@@ -21,6 +21,7 @@ model User {
   createdAt DateTime @default(now()) 
   taskAssingments TaskAssignee[]
   subtasksAssigned Subtask[]
+  todos Todo[]
 }
 
 model Task { 
@@ -53,4 +54,14 @@ model Subtask {
   createdAt DateTime @default(now()) 
   task Task @relation(fields: [taskId], references: [id]) 
   assignee User? @relation(fields: [assignedTo], references: [id]) 
+}
+
+model Todo { 
+  id Int @id @default(autoincrement()) 
+  userId Int 
+  title String 
+  status String @default("pending") 
+  dueDate DateTime? 
+  createdAt DateTime @default(now()) 
+  user User @relation(fields: [userId], references: [id]) 
 }
