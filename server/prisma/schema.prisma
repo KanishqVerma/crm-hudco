@@ -22,6 +22,8 @@ model User {
   taskAssingments TaskAssignee[]
   subtasksAssigned Subtask[]
   todos Todo[]
+  conversations ConversationParticipant[] 
+  messagesSent Message[] 
 }
 
 model Task { 
@@ -65,3 +67,30 @@ model Todo {
   createdAt DateTime @default(now()) 
   user User @relation(fields: [userId], references: [id]) 
 }
+
+model Conversation { 
+  id Int @id @default(autoincrement()) 
+  createdAt DateTime @default(now()) 
+  participants ConversationParticipant[] 
+  messages Message[] 
+} 
+
+model ConversationParticipant { 
+  id Int @id @default(autoincrement()) 
+  conversationId Int 
+  userId Int 
+  conversation Conversation @relation(fields: [conversationId], references: [id]) 
+  user User @relation(fields: [userId], references: [id]) 
+  @@unique([conversationId, userId]) 
+} 
+
+model Message { 
+  id Int @id @default(autoincrement()) 
+  conversationId Int 
+  senderId Int 
+  content String @db.Text 
+  createdAt DateTime @default(now()) 
+  conversation Conversation @relation(fields: [conversationId], references: [id]) 
+  sender User @relation(fields: [senderId], references: [id])
+}
+
