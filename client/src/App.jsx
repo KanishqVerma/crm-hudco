@@ -8,6 +8,7 @@ import Layout from "./components/Layout";
 import CalendarPage from "./pages/Calendar";
 import Todos from "./pages/Todos";
 import Chat from "./pages/Chat";
+import { SocketProvider } from './context/SocketContext'; 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
   if (!user) return;
@@ -69,11 +70,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      {" "}
       <AuthProvider>
-        {" "}
-        <AppRoutes />{" "}
-      </AuthProvider>{" "}
+        <SocketProvider>
+          <AppRoutes />
+        </SocketProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

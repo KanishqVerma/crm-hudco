@@ -44,7 +44,7 @@ export default function Todos() {
   return (
     <div className="max-w-2xl mx-auto p-10">
       {" "}
-      <h1 className="text-2xl font-bold text-ink mb-8">My to-dos</h1>{" "}
+      <h1 className="text-2xl font-bold text-ink mb-8">My To-Dos</h1>{" "}
       <form onSubmit={handleAdd} className="flex gap-2 mb-8">
         {" "}
         <input
