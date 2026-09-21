@@ -160,11 +160,14 @@ export default function Tasks() {
                   className="border rounded px-2 py-1"
                 >
                   <option value="">Unassigned</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name}
-                    </option>
-                  ))}
+                  {users
+                    .filter((u) => u.role !== "admin")
+                    .map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {" "}
+                        {u.name}{" "}
+                      </option>
+                    ))}
                 </select>
                 {subtaskInputs.length > 1 && (
                   <button
@@ -189,17 +192,19 @@ export default function Tasks() {
           <p className="text-sm font-semibold mb-2">Assign to:</p>{" "}
           <div className="mb-4">
             {" "}
-            {users.map((u) => (
-              <label key={u.id} className="flex items-center gap-2 mb-1">
-                {" "}
-                <input
-                  type="checkbox"
-                  checked={assigneeIds.includes(u.id)}
-                  onChange={() => toggleAssignee(u.id)}
-                />{" "}
-                {u.name} ({u.role}){" "}
-              </label>
-            ))}{" "}
+            {users
+              .filter((u) => u.role !== "admin")
+              .map((u) => (
+                <label key={u.id} className="flex items-center gap-2 mb-1">
+                  {" "}
+                  <input
+                    type="checkbox"
+                    checked={assigneeIds.includes(u.id)}
+                    onChange={() => toggleAssignee(u.id)}
+                  />{" "}
+                  {u.name} ({u.role}){" "}
+                </label>
+              ))}{" "}
           </div>{" "}
           <button
             type="submit"
@@ -285,4 +290,3 @@ export default function Tasks() {
     </div>
   );
 }
-
