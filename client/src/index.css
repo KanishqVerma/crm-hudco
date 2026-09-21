@@ -1,1 +1,2 @@
-@import "tailwindcss";
+@import "tailwindcss"; 
+@theme { --color-ink: #1C2333; --color-canvas: #F7F5F1; --color-steel: #2B4C7E; --color-steel-dark: #1F3A63; --color-ochre: #C08552; --color-moss: #3F7A5E; --color-brick: #B33F3F; --color-line: #D8D3C7; --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif; } body { background-color: var(--color-canvas); color: var(--color-ink); font-family: var(--font-sans); }

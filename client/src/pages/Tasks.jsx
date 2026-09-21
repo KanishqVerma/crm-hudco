@@ -32,13 +32,15 @@ export default function Tasks() {
       description,
       deadline: deadline || null,
       assigneeIds,
-      subtasks: subtaskInputs .filter((s) => s.title.trim() !== '') .map((s) => ({ title: s.title, assignedTo: s.assignedTo || null })),
+      subtasks: subtaskInputs
+        .filter((s) => s.title.trim() !== "")
+        .map((s) => ({ title: s.title, assignedTo: s.assignedTo || null })),
     });
     setTitle("");
     setDescription("");
     setDeadline("");
     setAssigneeIds([]);
-    setSubtaskInputs([{ title: '', assignedTo: '' }])
+    setSubtaskInputs([{ title: "", assignedTo: "" }]);
     setShowForm(false);
     loadTasks();
   };
@@ -64,6 +66,11 @@ export default function Tasks() {
       // If it fails, reload for real to undo the optimistic change
       loadTasks();
     }
+  };
+  const handleDeleteTask = async (taskId) => {
+    if (!confirm("Delete this task? This cannot be undone.")) return;
+    await api.delete(`/tasks/${taskId}`);
+    loadTasks();
   };
   const toggleAssignee = (userId) => {
     setAssigneeIds((prev) =>
@@ -102,7 +109,7 @@ export default function Tasks() {
         {isAdmin && (
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-steel text-white px-4 py-2 rounded hover:bg-steel-dark"
           >
             {" "}
             {showForm ? "Cancel" : "+ New Task"}{" "}
@@ -148,17 +155,23 @@ export default function Tasks() {
                   className="flex-1 border rounded px-3 py-1"
                 />
                 <select
-                  value={sub.assignedTo || ''}
+                  value={sub.assignedTo || ""}
                   onChange={(e) => updateSubtaskAssignee(i, e.target.value)}
                   className="border rounded px-2 py-1"
                 >
                   <option value="">Unassigned</option>
                   {users.map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
+                    <option key={u.id} value={u.id}>
+                      {u.name}
+                    </option>
                   ))}
                 </select>
                 {subtaskInputs.length > 1 && (
-                  <button type="button" onClick={() => removeSubtaskInput(i)} className="text-red-500 text-sm">
+                  <button
+                    type="button"
+                    onClick={() => removeSubtaskInput(i)}
+                    className="text-brick text-sm"
+                  >
                     Remove
                   </button>
                 )}
@@ -167,7 +180,7 @@ export default function Tasks() {
             <button
               type="button"
               onClick={addSubtaskInput}
-              className="text-blue-600 text-sm"
+              className="text-steel text-sm"
             >
               {" "}
               + Add another subtask{" "}
@@ -190,7 +203,7 @@ export default function Tasks() {
           </div>{" "}
           <button
             type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="bg-moss text-white px-4 py-2 rounded hover:bg-moss"
           >
             {" "}
             Create Task{" "}
@@ -216,9 +229,16 @@ export default function Tasks() {
               </div>{" "}
               {task.deadline && (
                 <span className="text-sm text-gray-500">
-                  {" "}
-                  Due: {new Date(task.deadline).toLocaleDateString()}{" "}
+                  Due: {new Date(task.deadline).toLocaleDateString()}
                 </span>
+              )}
+              {isAdmin && (
+                <button
+                  onClick={() => handleDeleteTask(task.id)}
+                  className="text-xs text-brick hover:underline ml-3"
+                >
+                  Delete
+                </button>
               )}{" "}
             </div>{" "}
             {task.assignees && (
@@ -265,3 +285,4 @@ export default function Tasks() {
     </div>
   );
 }
+

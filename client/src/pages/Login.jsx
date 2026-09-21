@@ -12,48 +12,50 @@ export default function Login() {
     setError("");
     try {
       await login(email, password);
-      navigate("/dashboard");
+      navigate("/tasks");
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-canvas px-4">
       {" "}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm"
-      >
+      <form onSubmit={handleSubmit} className="w-full max-w-sm">
         {" "}
-        <h1 className="text-2xl font-bold mb-6 text-center">Log In</h1>{" "}
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}{" "}
+        <p className="text-sm text-ink/50 mb-1">Internal workspace</p>{" "}
+        <h1 className="text-2xl font-bold text-ink mb-8">Log in</h1>{" "}
+        {error && <p className="text-brick text-sm mb-4">{error}</p>}{" "}
+        <label className="block text-sm font-medium text-ink/70 mb-1">
+          Email
+        </label>{" "}
         <input
           type="email"
-          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border rounded px-3 py-2 mb-3"
+          className="w-full border border-line rounded px-3 py-2 mb-4 bg-white focus:outline-none focus:ring-2 focus:ring-steel"
           required
         />{" "}
+        <label className="block text-sm font-medium text-ink/70 mb-1">
+          Password
+        </label>{" "}
         <input
           type="password"
-          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border rounded px-3 py-2 mb-4"
+          className="w-full border border-line rounded px-3 py-2 mb-6 bg-white focus:outline-none focus:ring-2 focus:ring-steel"
           required
         />{" "}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white rounded py-2 font-semibold hover:bg-blue-700"
+          className="w-full bg-steel text-white rounded py-2.5 font-semibold hover:bg-steel-dark transition-colors"
         >
           {" "}
-          Log In{" "}
+          Log in{" "}
         </button>{" "}
-        <p className="text-sm text-center mt-4">
+        <p className="text-sm text-ink/60 text-center mt-6">
           {" "}
           No account?{" "}
-          <Link to="/register" className="text-blue-600">
+          <Link to="/register" className="text-steel font-medium">
             Register
           </Link>{" "}
         </p>{" "}

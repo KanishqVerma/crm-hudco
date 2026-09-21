@@ -96,4 +96,19 @@ router.patch("/subtask/:id", requireAuth, async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 });
+
+// DELETE a task (admin only)
+router.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const taskId = parseInt(req.params.id);
+    // Delete related subtasks and assignees first, since they reference this task
+    await prisma.subtask.deleteMany({ where: { taskId } });
+    await prisma.taskAssignee.deleteMany({ where: { taskId } });
+    await prisma.task.delete({ where: { id: taskId } });
+    res.json({ message: "Task deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
 export default router;
