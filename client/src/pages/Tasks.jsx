@@ -11,14 +11,17 @@ export default function Tasks() {
   const [deadline, setDeadline] = useState("");
   const [assigneeIds, setAssigneeIds] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [subtaskInputs, setSubtaskInputs] = useState([
     { title: "", assignedTo: "" },
   ]);
   const isAdmin = user?.role === "admin";
   const loadTasks = async () => {
+    setLoading(true);
     const endpoint = isAdmin ? "/tasks" : "/tasks/mine";
     const res = await api.get(endpoint);
     setTasks(res.data);
+    setLoading(false);
   };
   useEffect(() => {
     loadTasks();
@@ -234,9 +237,11 @@ export default function Tasks() {
       )}{" "}
       <div className="space-y-4">
         {" "}
-        {tasks.length === 0 && (
-          <p className="text-gray-400">No tasks yet.</p>
-        )}{" "}
+        {loading ? (
+          <p className="text-ink/40">Loading tasks...</p>
+        ) : tasks.length === 0 ? (
+          <p className="text-ink/40">No tasks yet.</p>
+        ) : null}
         {tasks.map((task) => (
           <div key={task.id} className="bg-white p-4 rounded-lg shadow">
             {" "}

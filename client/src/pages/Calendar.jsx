@@ -79,28 +79,31 @@ export default function CalendarPage() {
     new Date(today.getFullYear(), today.getMonth(), 1),
   );
   const [tasksByDate, setTasksByDate] = useState({});
+  const [loading, setLoading] = useState(true);
   const [todosByDate, setTodosByDate] = useState({});
   useEffect(() => {
+    setLoading(true);
     const endpoint = isAdmin ? "/calendar/team" : "/calendar/mine";
-    api.get(endpoint).then((res) => {
-      const map = {};
-      res.data.forEach((task) => {
-        const key = keyFromUTCDate(task.deadline);
-        if (!map[key]) map[key] = [];
-        map[key].push(task);
-      });
-      setTasksByDate(map);
-    });
-    api.get("/todos").then((res) => {
-      const map = {};
-      res.data.forEach((todo) => {
-        if (!todo.dueDate) return;
-        const key = keyFromUTCDate(todo.dueDate);
-        if (!map[key]) map[key] = [];
-        map[key].push(todo);
-      });
-      setTodosByDate(map);
-    });
+    Promise.all([api.get(endpoint), api.get("/todos")]).then(
+      ([tasksRes, todosRes]) => {
+        const taskMap = {};
+        tasksRes.data.forEach((task) => {
+          const key = keyFromUTCDate(task.deadline);
+          if (!taskMap[key]) taskMap[key] = [];
+          taskMap[key].push(task);
+        });
+        setTasksByDate(taskMap);
+        const todoMap = {};
+        todosRes.data.forEach((todo) => {
+          if (!todo.dueDate) return;
+          const key = keyFromUTCDate(todo.dueDate);
+          if (!todoMap[key]) todoMap[key] = [];
+          todoMap[key].push(todo);
+        });
+        setTodosByDate(todoMap);
+        setLoading(false);
+      },
+    );
   }, []);
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -148,6 +151,7 @@ export default function CalendarPage() {
       <h2 className="text-lg font-semibold text-ink mb-4">
         {MONTH_NAMES[month]} {year}
       </h2>{" "}
+      {loading && <p className="text-ink/40 mb-4">Loading calendar...</p>}
       <div className="grid grid-cols-7 gap-px bg-line border border-line rounded overflow-hidden">
         {" "}
         {WEEKDAYS.map((day) => (

@@ -5,9 +5,12 @@ export default function Todos() {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const loadTodos = async () => {
+    setLoading(true);
     const res = await api.get("/todos");
     setTodos(res.data);
+    setLoading(false);
   };
   useEffect(() => {
     loadTodos();
@@ -80,9 +83,11 @@ export default function Todos() {
           Add{" "}
         </button>{" "}
       </form>{" "}
-      {todos.length === 0 && (
+      {loading ? (
+        <p className="text-ink/40">Loading...</p>
+      ) : todos.length === 0 ? (
         <p className="text-ink/40">Nothing here yet.</p>
-      )}{" "}
+      ) : null}{" "}
       {pending.length > 0 && (
         <div className="space-y-2 mb-8">
           {" "}
