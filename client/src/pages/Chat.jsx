@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import api from "../api/axios";
+import { useUnread } from '../context/UnreadContext'; 
 
 export default function Chat() {
   const { user } = useAuth();
   const socket = useSocket();
+  const { refreshUnread } = useUnread();
   const [conversations, setConversations] = useState([]);
   const [users, setUsers] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -36,7 +38,11 @@ export default function Chat() {
     const handleNewMessage = (message) => {
       if (message.conversationId === activeId) {
         setMessages((prev) => [...prev, message]);
+        api.patch(`/chat/conversations/${activeId}/read`);
+        // stay marked as read while actively viewing
       }
+      loadConversations();
+      // refresh unread badges for any conversation, active or not
     };
 
     socket.on("newMessage", handleNewMessage);
@@ -51,6 +57,10 @@ export default function Chat() {
     setActiveId(id);
     const res = await api.get(`/chat/conversations/${id}/messages`);
     setMessages(res.data);
+    // Mark this conversation as read, then refresh the sidebar so its unread badge clears await
+    api.patch(`/chat/conversations/${id}/read`);
+    loadConversations();
+    refreshUnread();
   };
 
   const startConversation = async (otherUserId) => {
@@ -121,18 +131,32 @@ export default function Chat() {
               <button
                 key={conv.id}
                 onClick={() => openConversation(conv.id)}
-                className={`block w-full text-left px-4 py-3 border-b border-line hover:bg-canvas ${
-                  activeId === conv.id ? "bg-canvas" : ""
-                }`}
+                className={`flex items-center justify-between w-full text-left px-4 py-3 border-b border-line hover:bg-canvas ${activeId === conv.id ? "bg-canvas" : ""}`}
               >
-                <p className="font-medium text-sm text-ink">
-                  {other?.name || "Unknown"}
-                </p>
-                {lastMsg && (
-                  <p className="text-xs text-ink/40 truncate">
-                    {lastMsg.content}
-                  </p>
-                )}
+                {" "}
+                <div className="min-w-0">
+                  {" "}
+                  <p
+                    className={`text-sm truncate ${conv.unreadCount > 0 ? "font-bold text-ink" : "font-medium text-ink"}`}
+                  >
+                    {" "}
+                    {other?.name || "Unknown"}{" "}
+                  </p>{" "}
+                  {lastMsg && (
+                    <p
+                      className={`text-xs truncate ${conv.unreadCount > 0 ? "text-ink/70" : "text-ink/40"}`}
+                    >
+                      {" "}
+                      {lastMsg.content}{" "}
+                    </p>
+                  )}{" "}
+                </div>{" "}
+                {conv.unreadCount > 0 && (
+                  <span className="bg-steel text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 ml-2">
+                    {" "}
+                    {conv.unreadCount}{" "}
+                  </span>
+                )}{" "}
               </button>
             );
           })}

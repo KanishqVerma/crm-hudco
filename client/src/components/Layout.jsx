@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useUnread } from "../context/UnreadContext";
 const navItems = [
   { to: "/tasks", label: "Tasks" },
   { to: "/calendar", label: "Calendar" },
@@ -8,6 +9,7 @@ const navItems = [
 ];
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  const { unreadTotal } = useUnread();
   const location = useLocation();
   return (
     <div className="min-h-screen flex bg-canvas">
@@ -29,10 +31,18 @@ export default function Layout({ children }) {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`block px-3 py-2 rounded text-sm font-medium transition-colors ${active ? "bg-ochre text-ink" : "text-white/70 hover:bg-white/5 hover:text-white"}`}
+                className={`flex items-center justify-between px-3 py-2 rounded text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-ochre text-ink"
+                    : "text-white/70 hover:bg-white/5 hover:text-white"
+                }`}
               >
-                {" "}
-                {item.label}{" "}
+                <span>{item.label}</span>
+                {item.to === "/chat" && unreadTotal > 0 && (
+                  <span className="bg-brick text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                    {unreadTotal}
+                  </span>
+                )}
               </Link>
             );
           })}{" "}

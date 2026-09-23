@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { UnreadProvider } from "./context/UnreadContext";
 import Tasks from "./pages/Tasks";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -8,7 +9,7 @@ import Layout from "./components/Layout";
 import CalendarPage from "./pages/Calendar";
 import Todos from "./pages/Todos";
 import Chat from "./pages/Chat";
-import { SocketProvider } from './context/SocketContext'; 
+import { SocketProvider } from "./context/SocketContext";
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
@@ -71,7 +72,16 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <SocketProvider>
-          <AppRoutes />
+          <AuthProvider>
+            {" "}
+            <SocketProvider>
+              {" "}
+              <UnreadProvider>
+                {" "}
+                <AppRoutes />{" "}
+              </UnreadProvider>{" "}
+            </SocketProvider>{" "}
+          </AuthProvider>
         </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
