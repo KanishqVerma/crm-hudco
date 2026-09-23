@@ -1,14 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useUnread } from "../context/UnreadContext";
-const navItems = [
-  { to: "/tasks", label: "Tasks" },
-  { to: "/calendar", label: "Calendar" },
-  { to: "/todos", label: "My To-Dos" },
-  { to: "/chat", label: "Chat" },
-];
+function getNavItems(role) { const items = [ { to: '/tasks', label: 'Tasks' }, { to: '/calendar', label: 'Calendar' }, { to: '/todos', label: 'My To-Dos' }, { to: '/chat', label: 'Chat' }, ]; if (role === 'admin') { items.push({ to: '/admin', label: 'Manage Users' }); } return items; }
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  const navItems = getNavItems(user?.role);
   const { unreadTotal } = useUnread();
   const location = useLocation();
   return (

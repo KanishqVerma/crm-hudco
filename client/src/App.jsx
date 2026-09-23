@@ -9,6 +9,7 @@ import Layout from "./components/Layout";
 import CalendarPage from "./pages/Calendar";
 import Todos from "./pages/Todos";
 import Chat from "./pages/Chat";
+import Admin from "./pages/Admin";
 import { SocketProvider } from "./context/SocketContext";
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -39,6 +40,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/login" />} />{" "}
       <Route
         path="/calendar"

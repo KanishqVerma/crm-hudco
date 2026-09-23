@@ -30,4 +30,31 @@ router.get("/", requireAuth, requireAdmin, async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 });
+// Promote or demote a user's role (admin only)
+// Promote or demote a user's role (admin only)
+router.patch('/:id/role', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const { role } = req.body;
+
+    if (userId === req.user.userId) {
+      return res.status(400).json({ error: 'You cannot change your own role' });
+    }
+
+    if (!['admin', 'employee'].includes(role)) {
+      return res.status(400).json({ error: 'Role must be admin or employee' });
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: { id: true, name: true, email: true, role: true },
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
 export default router;

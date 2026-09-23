@@ -5,7 +5,6 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("employee");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const { register } = useAuth();
@@ -14,7 +13,7 @@ export default function Register() {
     e.preventDefault();
     setError(""); 
     try {
-      await register(name, email, password, role);
+      await register(name, email, password);
       setSuccess(true);
       setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
@@ -64,18 +63,6 @@ export default function Register() {
           className="w-full border border-line rounded px-3 py-2 mb-4 bg-white focus:outline-none focus:ring-2 focus:ring-steel"
           required
         />{" "}
-        <label className="block text-sm font-medium text-ink/70 mb-1">
-          Role
-        </label>{" "}
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="w-full border border-line rounded px-3 py-2 mb-6 bg-white focus:outline-none focus:ring-2 focus:ring-steel"
-        >
-          {" "}
-          <option value="employee">Employee</option>{" "}
-          <option value="admin">Admin</option>{" "}
-        </select>{" "}
         <button
           type="submit"
           className="w-full bg-steel text-white rounded py-2.5 font-semibold hover:bg-steel-dark transition-colors"
