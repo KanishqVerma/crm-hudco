@@ -7,12 +7,21 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { register } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     try {
       await register(name, email, password);
       setSuccess(true);
@@ -75,6 +84,19 @@ export default function Register() {
             {showPassword ? "Hide" : "Show"}{" "}
           </button>{" "}
         </div>{" "}
+        <label className="block text-sm font-medium text-ink/70 mb-1">
+          Confirm password
+        </label>{" "}
+        <div className="relative mb-4">
+          {" "}
+          <input
+            type={showPassword ? "text" : "password"}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full border border-line rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-steel"
+            required
+          />{" "}
+        </div>
         <button
           type="submit"
           className="w-full bg-steel text-white rounded py-2.5 font-semibold hover:bg-steel-dark transition-colors"

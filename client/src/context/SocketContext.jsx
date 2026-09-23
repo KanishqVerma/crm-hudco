@@ -12,7 +12,7 @@ export function SocketProvider({ children }) {
       return;
     }
     const token = localStorage.getItem("token");
-    const newSocket = io("http://localhost:5000", { auth: { token } });
+    const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', { auth: { token } });
     setSocket(newSocket);
     return () => newSocket.disconnect();
   }, [user]);
