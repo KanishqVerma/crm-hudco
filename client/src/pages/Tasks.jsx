@@ -10,6 +10,7 @@ export default function Tasks() {
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState("");
   const [assigneeIds, setAssigneeIds] = useState([]);
+  const [error, setError] = useState("");
   const [subtaskInputs, setSubtaskInputs] = useState([
     { title: "", assignedTo: "" },
   ]);
@@ -27,22 +28,29 @@ export default function Tasks() {
   }, []);
   const handleCreateTask = async (e) => {
     e.preventDefault();
-    await api.post("/tasks", {
-      title,
-      description,
-      deadline: deadline || null,
-      assigneeIds,
-      subtasks: subtaskInputs
-        .filter((s) => s.title.trim() !== "")
-        .map((s) => ({ title: s.title, assignedTo: s.assignedTo || null })),
-    });
-    setTitle("");
-    setDescription("");
-    setDeadline("");
-    setAssigneeIds([]);
-    setSubtaskInputs([{ title: "", assignedTo: "" }]);
-    setShowForm(false);
-    loadTasks();
+    setError("");
+    try {
+      await api.post("/tasks", {
+        title,
+        description,
+        deadline: deadline || null,
+        assigneeIds,
+        subtasks: subtaskInputs
+          .filter((s) => s.title.trim() !== "")
+          .map((s) => ({ title: s.title, assignedTo: s.assignedTo || null })),
+      });
+      setTitle("");
+      setDescription("");
+      setDeadline("");
+      setAssigneeIds([]);
+      setSubtaskInputs([{ title: "", assignedTo: "" }]);
+      setShowForm(false);
+      loadTasks();
+    } catch (err) {
+      setError(
+        err.response?.data?.error || "Failed to create task. Please try again.",
+      );
+    }
   };
   const toggleSubtask = async (taskId, subtaskId, currentStatus) => {
     const newStatus = currentStatus === "done" ? "pending" : "done";
@@ -69,8 +77,12 @@ export default function Tasks() {
   };
   const handleDeleteTask = async (taskId) => {
     if (!confirm("Delete this task? This cannot be undone.")) return;
-    await api.delete(`/tasks/${taskId}`);
-    loadTasks();
+    try {
+      await api.delete(`/tasks/${taskId}`);
+      loadTasks();
+    } catch (err) {
+      setError("Failed to delete task. Please try again.");
+    }
   };
   const toggleAssignee = (userId) => {
     setAssigneeIds((prev) =>
@@ -121,7 +133,12 @@ export default function Tasks() {
           onSubmit={handleCreateTask}
           className="bg-white p-6 rounded-lg shadow mb-6"
         >
-          {" "}
+          {error && (
+            <p className="text-brick text-sm mb-3 bg-brick/10 border border-brick/30 rounded px-3 py-2">
+              {" "}
+              {error}{" "}
+            </p>
+          )}{" "}
           <input
             type="text"
             placeholder="Task title"

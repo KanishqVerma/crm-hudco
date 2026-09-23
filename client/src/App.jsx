@@ -11,8 +11,7 @@ import Chat from "./pages/Chat";
 import { SocketProvider } from './context/SocketContext'; 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
-  if (!user) return;
-  <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" />;
   return <Layout>{children}</Layout>;
 }
 function AppRoutes() {

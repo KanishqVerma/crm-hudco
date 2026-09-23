@@ -12,7 +12,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen flex bg-canvas">
       {" "}
-      <aside className="w-56 bg-ink text-canvas flex flex-col shrink-0">
+      <aside className="w-56 bg-ink text-canvas flex flex-col shrink-0 h-screen sticky top-0 overflow-y auto">
         {" "}
         <div className="px-5 py-6 border-b border-white/10">
           {" "}

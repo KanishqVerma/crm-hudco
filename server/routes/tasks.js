@@ -71,6 +71,7 @@ router.get("/", requireAuth, requireAdmin, async (req, res) => {
 });
 
 // UPDATE a subtask's status (only the assigned employee can check it off)
+// UPDATE a subtask's status (only the assigned employee can check it off)
 router.patch("/subtask/:id", requireAuth, async (req, res) => {
   try {
     const subtaskId = parseInt(req.params.id);
@@ -90,6 +91,18 @@ router.patch("/subtask/:id", requireAuth, async (req, res) => {
       where: { id: subtaskId },
       data: { status },
     });
+
+    // Check if ALL subtasks under this task are now done, and update the parent task's status to match
+    const allSubtasks = await prisma.subtask.findMany({
+      where: { taskId: subtask.taskId },
+    });
+    const allDone = allSubtasks.length > 0 && allSubtasks.every((s) => s.status === "done");
+
+    await prisma.task.update({
+      where: { id: subtask.taskId },
+      data: { status: allDone ? "done" : "pending" },
+    });
+
     res.json(updated);
   } catch (err) {
     console.error(err);

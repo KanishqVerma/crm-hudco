@@ -4,6 +4,7 @@ export default function Todos() {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [error, setError] = useState("");
   const loadTodos = async () => {
     const res = await api.get("/todos");
     setTodos(res.data);
@@ -14,10 +15,15 @@ export default function Todos() {
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    await api.post("/todos", { title, dueDate: dueDate || null });
-    setTitle("");
-    setDueDate("");
-    loadTodos();
+    setError("");
+    try {
+      await api.post("/todos", { title, dueDate: dueDate || null });
+      setTitle("");
+      setDueDate("");
+      loadTodos();
+    } catch (err) {
+      setError("Failed to add to-do. Please try again.");
+    }
   };
   const toggleStatus = async (todo) => {
     const newStatus = todo.status === "done" ? "pending" : "done";
@@ -45,6 +51,12 @@ export default function Todos() {
     <div className="max-w-2xl mx-auto p-10">
       {" "}
       <h1 className="text-2xl font-bold text-ink mb-8">My To-Dos</h1>{" "}
+      {error && (
+        <p className="text-brick text-sm mb-4 bg-brick/10 border border-brick/30 rounded px-3 py-2">
+          {" "}
+          {error}{" "}
+        </p>
+      )}
       <form onSubmit={handleAdd} className="flex gap-2 mb-8">
         {" "}
         <input
