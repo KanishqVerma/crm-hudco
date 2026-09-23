@@ -96,7 +96,8 @@ router.patch("/subtask/:id", requireAuth, async (req, res) => {
     const allSubtasks = await prisma.subtask.findMany({
       where: { taskId: subtask.taskId },
     });
-    const allDone = allSubtasks.length > 0 && allSubtasks.every((s) => s.status === "done");
+    const allDone =
+      allSubtasks.length > 0 && allSubtasks.every((s) => s.status === "done");
 
     await prisma.task.update({
       where: { id: subtask.taskId },
@@ -119,6 +120,29 @@ router.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
     await prisma.taskAssignee.deleteMany({ where: { taskId } });
     await prisma.task.delete({ where: { id: taskId } });
     res.json({ message: "Task deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+// Directly mark a task itself as done/pending (any assignee, or admin)
+router.patch("/:id/status", requireAuth, async (req, res) => {
+  try {
+    const taskId = parseInt(req.params.id);
+    const { status } = req.body;
+    const assignment = await prisma.taskAssignee.findFirst({
+      where: { taskId, userId: req.user.userId },
+    });
+    if (!assignment && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "You can only update tasks assigned to you" });
+    }
+    const updated = await prisma.task.update({
+      where: { id: taskId },
+      data: { status },
+    });
+    res.json(updated);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Something went wrong" });

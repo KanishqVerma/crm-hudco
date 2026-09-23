@@ -12,6 +12,7 @@ export default function Tasks() {
   const [assigneeIds, setAssigneeIds] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   const [subtaskInputs, setSubtaskInputs] = useState([
     { title: "", assignedTo: "" },
   ]);
@@ -75,6 +76,17 @@ export default function Tasks() {
       await api.patch(`/tasks/subtask/${subtaskId}`, { status: newStatus });
     } catch (err) {
       // If it fails, reload for real to undo the optimistic change
+      loadTasks();
+    }
+  };
+  const toggleTaskStatus = async (task) => {
+    const newStatus = task.status === "done" ? "pending" : "done";
+    setTasks((prev) =>
+      prev.map((t) => (t.id === task.id ? { ...t, status: newStatus } : t)),
+    );
+    try {
+      await api.patch(`/tasks/${task.id}/status`, { status: newStatus });
+    } catch (err) {
       loadTasks();
     }
   };
@@ -235,6 +247,13 @@ export default function Tasks() {
           </button>{" "}
         </form>
       )}{" "}
+      <input
+        type="text"
+        placeholder="Search tasks..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full border border-line rounded px-3 py-2 mb-4 bg-white focus:outline-none focus:ring-2 focus:ring-steel"
+      />
       <div className="space-y-4">
         {" "}
         {loading ? (
@@ -242,72 +261,95 @@ export default function Tasks() {
         ) : tasks.length === 0 ? (
           <p className="text-ink/40">No tasks yet.</p>
         ) : null}
-        {tasks.map((task) => (
-          <div key={task.id} className="bg-white p-4 rounded-lg shadow">
-            {" "}
-            <div className="flex justify-between items-start">
+        {tasks
+          .filter((task) =>
+            task.title.toLowerCase().includes(searchTerm.toLowerCase()),
+          )
+          .map((task) => (
+            <div key={task.id} className="bg-white p-4 rounded-lg shadow">
               {" "}
-              <div>
+              <div className="flex justify-between items-start">
                 {" "}
-                <h3 className="font-semibold text-lg">{task.title}</h3>{" "}
-                {task.description && (
-                  <p className="text-gray-600 text-sm">{task.description}</p>
-                )}{" "}
-              </div>{" "}
-              {task.deadline && (
-                <span className="text-sm text-gray-500">
-                  Due: {new Date(task.deadline).toLocaleDateString()}
-                </span>
-              )}
-              {isAdmin && (
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="text-xs text-brick hover:underline ml-3"
-                >
-                  Delete
-                </button>
-              )}{" "}
-            </div>{" "}
-            {task.assignees && (
-              <p className="text-xs text-gray-400 mt-1">
-                {" "}
-                Assigned to:{" "}
-                {task.assignees.map((a) => a.user.name).join(", ")}{" "}
-              </p>
-            )}{" "}
-            {task.subtasks && task.subtasks.length > 0 && (
-              <div className="mt-3 space-y-1">
-                {" "}
-                {task.subtasks.map((sub) => (
-                  <label
-                    key={sub.id}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    {" "}
+                <div className="flex items-start gap-2">
+                  {" "}
+                  {(isAdmin ||
+                    task.assignees?.some((a) => a.user.id === user.id)) && (
                     <input
                       type="checkbox"
-                      checked={sub.status === "done"}
-                      onChange={() =>
-                        toggleSubtask(task.id, sub.id, sub.status)
-                      }
-                      disabled={isAdmin && sub.assignedTo !== user.id}
-                    />{" "}
-                    <span
-                      className={
-                        sub.status === "done"
-                          ? "line-through text-gray-400"
-                          : ""
-                      }
+                      checked={task.status === "done"}
+                      onChange={() => toggleTaskStatus(task)}
+                      className="mt-1.5 accent-moss"
+                    />
+                  )}{" "}
+                  <div>
+                    {" "}
+                    <h3
+                      className={`font-semibold text-lg ${task.status === "done" ? "line-through text-gray-400" : ""}`}
                     >
                       {" "}
-                      {sub.title}{" "}
-                    </span>{" "}
-                  </label>
-                ))}{" "}
-              </div>
-            )}{" "}
-          </div>
-        ))}{" "}
+                      {task.title}{" "}
+                    </h3>{" "}
+                    {task.description && (
+                      <p className="text-gray-600 text-sm">
+                        {task.description}
+                      </p>
+                    )}{" "}
+                  </div>{" "}
+                </div>{" "}
+                {task.deadline && (
+                  <span className="text-sm text-gray-500">
+                    Due: {new Date(task.deadline).toLocaleDateString()}
+                  </span>
+                )}
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="text-xs text-brick hover:underline ml-3"
+                  >
+                    Delete
+                  </button>
+                )}{" "}
+              </div>{" "}
+              {task.assignees && (
+                <p className="text-xs text-gray-400 mt-1">
+                  {" "}
+                  Assigned to:{" "}
+                  {task.assignees.map((a) => a.user.name).join(", ")}{" "}
+                </p>
+              )}{" "}
+              {task.subtasks && task.subtasks.length > 0 && (
+                <div className="mt-3 space-y-1">
+                  {" "}
+                  {task.subtasks.map((sub) => (
+                    <label
+                      key={sub.id}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      {" "}
+                      <input
+                        type="checkbox"
+                        checked={sub.status === "done"}
+                        onChange={() =>
+                          toggleSubtask(task.id, sub.id, sub.status)
+                        }
+                        disabled={isAdmin && sub.assignedTo !== user.id}
+                      />{" "}
+                      <span
+                        className={
+                          sub.status === "done"
+                            ? "line-through text-gray-400"
+                            : ""
+                        }
+                      >
+                        {" "}
+                        {sub.title}{" "}
+                      </span>{" "}
+                    </label>
+                  ))}{" "}
+                </div>
+              )}{" "}
+            </div>
+          ))}{" "}
       </div>{" "}
     </div>
   );

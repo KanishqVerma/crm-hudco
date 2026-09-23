@@ -40,8 +40,30 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/login" />} />{" "}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/tasks" replace />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/tasks" replace />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/calendar"
         element={

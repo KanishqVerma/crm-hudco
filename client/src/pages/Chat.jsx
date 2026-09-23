@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import api from "../api/axios";
-import { useUnread } from '../context/UnreadContext'; 
+import { useUnread } from "../context/UnreadContext";
 
 export default function Chat() {
   const { user } = useAuth();
@@ -15,6 +15,8 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [showNewChat, setShowNewChat] = useState(false);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [newChatSearch, setNewChatSearch] = useState("");
   const messagesEndRef = useRef(null);
 
   const loadConversations = async () => {
@@ -106,60 +108,83 @@ export default function Chat() {
 
         {showNewChat && (
           <div className="p-3 border-b border-line">
+            <input
+              type="text"
+              placeholder="Search people..."
+              value={newChatSearch}
+              onChange={(e) => setNewChatSearch(e.target.value)}
+              className="w-full border border-line rounded px-2 py-1.5 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-steel"
+            />
             {users.length === 0 && (
               <p className="text-xs text-ink/40">
                 No users to list (only admins can browse all users right now).
               </p>
             )}
-            {users.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => startConversation(u.id)}
-                className="block w-full text-left px-2 py-1.5 text-sm rounded hover:bg-canvas"
-              >
-                {u.name} <span className="text-ink/40 text-xs">({u.role})</span>
-              </button>
-            ))}
+            {users
+              .filter((u) =>
+                u.name.toLowerCase().includes(newChatSearch.toLowerCase()),
+              )
+              .map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => startConversation(u.id)}
+                  className="block w-full text-left px-2 py-1.5 text-sm rounded hover:bg-canvas"
+                >
+                  {u.name}{" "}
+                  <span className="text-ink/40 text-xs">({u.role})</span>
+                </button>
+              ))}
           </div>
         )}
-
+        <div className="p-3 border-b border-line">
+          {" "}
+          <input
+            type="text"
+            placeholder="Search conversations..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full border border-line rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-steel"
+          />{" "}
+        </div>
         <div className="flex-1 overflow-y-auto">
-          {conversations.map((conv) => {
-            const other = getOtherParticipant(conv);
-            const lastMsg = conv.messages?.[0];
-            return (
-              <button
-                key={conv.id}
-                onClick={() => openConversation(conv.id)}
-                className={`flex items-center justify-between w-full text-left px-4 py-3 border-b border-line hover:bg-canvas ${activeId === conv.id ? "bg-canvas" : ""}`}
-              >
-                {" "}
-                <div className="min-w-0">
-                  {" "}
-                  <p
-                    className={`text-sm truncate ${conv.unreadCount > 0 ? "font-bold text-ink" : "font-medium text-ink"}`}
-                  >
-                    {" "}
-                    {other?.name || "Unknown"}{" "}
-                  </p>{" "}
-                  {lastMsg && (
+          {conversations
+            .filter((conv) => {
+              const other = getOtherParticipant(conv);
+              return other?.name
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase());
+            })
+            .map((conv) => {
+              const other = getOtherParticipant(conv);
+              const lastMsg = conv.messages?.[0];
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => openConversation(conv.id)}
+                  className={`flex items-center justify-between w-full text-left px-4 py-3 border-b border-line hover:bg-canvas ${activeId === conv.id ? "bg-canvas" : ""}`}
+                >
+                  <div className="min-w-0">
                     <p
-                      className={`text-xs truncate ${conv.unreadCount > 0 ? "text-ink/70" : "text-ink/40"}`}
+                      className={`text-sm truncate ${conv.unreadCount > 0 ? "font-bold text-ink" : "font-medium text-ink"}`}
                     >
-                      {" "}
-                      {lastMsg.content}{" "}
+                      {other?.name || "Unknown"}
                     </p>
-                  )}{" "}
-                </div>{" "}
-                {conv.unreadCount > 0 && (
-                  <span className="bg-steel text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 ml-2">
-                    {" "}
-                    {conv.unreadCount}{" "}
-                  </span>
-                )}{" "}
-              </button>
-            );
-          })}
+                    {lastMsg && (
+                      <p
+                        className={`text-xs truncate ${conv.unreadCount > 0 ? "text-ink/70" : "text-ink/40"}`}
+                      >
+                        {lastMsg.content}
+                      </p>
+                    )}
+                  </div>
+                  {conv.unreadCount > 0 && (
+                    <span className="bg-steel text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 ml-2">
+                      {conv.unreadCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
         </div>
       </div>
 
