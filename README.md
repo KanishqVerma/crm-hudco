@@ -87,3 +87,122 @@ cp .env.example .env
 ```
 
 Edit `.env`:
+DATABASE_URL, JWT_SECRET
+
+
+Apply the database schema:
+
+```bash
+npx prisma migrate deploy
+npx prisma generate
+```
+
+Start the backend:
+
+```bash
+node index.js
+```
+
+The API runs at `http://localhost:5000`.
+
+### 3. Frontend setup
+
+In a **second terminal**:
+
+```bash
+cd client
+npm install
+cp .env.example .env
+npm run dev
+```
+
+The app runs at `http://localhost:5173`.
+
+> Both the backend and frontend need to be running at the same time, in separate terminals, for the app to work.
+
+### 4. Create your first account
+
+Register through the app's Register page — every public registration is created as an `employee`.
+
+To create your first **admin** account, do one of the following:
+- Update a user's `role` column directly to `admin` using Prisma Studio (`npx prisma studio`, inside `server`), or
+- If you already have an admin, promote someone through the in-app **Manage Users** page
+
+---
+
+## Environment Variables
+
+**`server/.env`**
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | MySQL connection string |
+| `JWT_SECRET` | Secret key used to sign and verify login tokens |
+
+**`client/.env`**
+
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | Base URL of the backend API (e.g., `http://localhost:5000/api`) |
+| `VITE_SOCKET_URL` | Base URL of the backend for Socket.IO (e.g., `http://localhost:5000`) |
+
+---
+
+## Project Structure
+crm-hudco/
+├── server/ # Express backend
+│ ├── prisma/
+│ │ ├── schema.prisma # Database schema
+│ │ └── migrations/ # Migration history
+│ ├── routes/ # API route handlers
+│ ├── middleware/ # Auth middleware
+│ └── index.js # Entry point (Express + Socket.IO)
+│
+└── client/ # React frontend
+└── src/
+├── pages/ # Route-level pages (Login, Tasks, Calendar, etc.)
+├── components/ # Shared components (Layout/sidebar)
+├── context/ # Auth, Socket, and Unread-count state
+└── api/ # Axios instance
+
+
+---
+
+## API Overview
+
+All protected routes require an `Authorization: Bearer <token>` header.
+
+| Area | Base path | Notes |
+|---|---|---|
+| Auth | `/api/auth` | Register, login |
+| Tasks | `/api/tasks` | CRUD, assignment, subtasks — admin/employee scoped |
+| To-Dos | `/api/todos` | Personal, owner-only CRUD |
+| Calendar | `/api/calendar` | Read-only, derived from task deadlines |
+| Users | `/api/users` | Admin-only listing, role promotion |
+| Chat | `/api/chat` | Conversations and message history |
+| Socket.IO | — | Real-time message delivery, connects at the server root |
+
+---
+
+## Roles & Permissions
+
+| Action | Employee | Admin |
+|---|---|---|
+| View own assigned tasks | ✅ | ✅ (all tasks) |
+| Create/delete tasks | ❌ | ✅ |
+| Check off own subtasks/tasks | ✅ | ✅ |
+| Manage personal to-dos | ✅ | ✅ |
+| Chat with anyone | ✅ | ✅ |
+| Promote/demote user roles | ❌ | ✅ (not on own account) |
+
+---
+
+## Known Limitations
+
+- No file/image attachments on tasks or chat messages yet
+- No email notifications for deadlines or new messages
+- Chat is currently one-on-one only; no group conversations
+
+## License
+
+Internal project — HUDCO.
