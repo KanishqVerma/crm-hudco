@@ -1,1 +1,89 @@
-# CRM — HUDCO Internal Tool A task management, calendar, to-do, and chat platform for admins and employees. ## Tech stack - Frontend: React (Vite) + Tailwind CSS - Backend: Express + Prisma + MySQL - Real-time: Socket.IO ## Prerequisites - Node.js v22+ - MySQL Server (8.0+) running locally, or a connection string to a hosted MySQL instance ## Setup ### 1. Clone the repo ``` git clone https://github.com/KanishqVerma/crm-hudco.git cd crm-hudco ``` ### 2. Backend setup ``` cd server npm install ``` Copy `.env.example` to `.env` and fill in your real database connection string and a JWT secret: ``` cp .env.example .env ``` Run database migrations: ``` npx prisma migrate deploy npx prisma generate ``` Start the backend: ``` node index.js ``` Server runs at `http://localhost:5000`. ### 3. Frontend setup Open a second terminal: ``` cd client npm install ``` Copy `.env.example` to `.env` (defaults should work for local use): ``` cp .env.example .env ``` Start the frontend: ``` npm run dev ``` App runs at `http://localhost:5173`. ### 4. Create your first account Register through the app's Register page — all public registrations are created as `employee` by default. To create an admin, either: - Update a user's `role` directly in the database (via Prisma Studio: `npx prisma studio`), or - Have an existing admin promote them via the in-app "Manage Users" page ## Notes - Both the backend (`node index.js`) and frontend (`npm run dev`) need to be running simultaneously in separate terminals. - Chat requires Socket.IO, which runs on the same backend server — no separate setup needed. 
+# CRM — HUDCO Internal Workspace
+
+An internal task management, calendar, to-do, and real-time chat platform built for HUDCO's admin and employee teams.
+
+Admins assign tasks with deadlines and subtasks to one or more employees, who track and complete their work through a shared dashboard. Deadlines automatically surface on a calendar, personal to-dos stay private per employee, and a real-time chat system connects admins and employees (or employees with each other) securely.
+
+---
+
+## Features
+
+**Authentication & Access Control**
+- Secure login/registration with hashed passwords and JWT-based sessions
+- Role-based access: `employee` and `admin`
+- Public registration always creates employee accounts — admin access can only be granted by an existing admin, through a dedicated in-app panel
+- Sessions persist across browser restarts, with automatic logout if a session becomes invalid or expires
+
+**Task Management**
+- Admins create tasks with a title, description, and deadline
+- Tasks can be assigned to multiple employees at once
+- Tasks support subtasks, each individually assignable to a specific employee
+- Employees can check off their own subtasks, or mark an entire task complete directly
+- A task's overall status automatically reflects its subtasks' completion
+- Search by task title
+- Admins can delete tasks
+
+**Calendar**
+- A real month-grid calendar view (not just a list) — navigate between months
+- Task deadlines and personal to-do due dates both appear on the grid, color-coded by status (upcoming, overdue, done, personal to-do)
+- Clicking an item jumps straight to the relevant Tasks or To-Dos page
+
+**Personal To-Dos**
+- Private, per-employee to-do list, fully separate from assigned tasks
+- Full create/complete/delete functionality with optional due dates
+
+**Real-Time Chat**
+- Secure one-on-one messaging between any two users (admin↔employee or employee↔employee)
+- Instant delivery via Socket.IO — no page refresh needed
+- Read/unread tracking, with unread counts shown per conversation and a global badge in the sidebar
+- Search to quickly find a person or an existing conversation
+
+**Admin Tools**
+- A dedicated "Manage Users" panel to promote employees to admin or demote admins back to employee
+- Admins cannot change their own role (prevents accidental lockout)
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React (Vite), Tailwind CSS, React Router |
+| Backend | Node.js, Express |
+| Database | MySQL, via Prisma ORM |
+| Real-time | Socket.IO |
+| Auth | JWT, bcrypt |
+
+---
+
+## Prerequisites
+
+- **Node.js** v22 or later
+- **MySQL Server** (8.0+) — either running locally, or a connection string to a hosted instance (e.g., Aiven)
+- **Git**
+
+---
+
+## Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/KanishqVerma/crm-hudco.git
+cd crm-hudco
+```
+
+### 2. Backend setup
+
+```bash
+cd server
+npm install
+```
+
+Copy the example environment file and fill in your real values:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
