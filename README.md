@@ -149,6 +149,7 @@ To create your first **admin** account, do one of the following:
 ---
 
 ## Project Structure
+```
 crm-hudco/
 ├── server/ # Express backend
 │ ├── prisma/
@@ -164,7 +165,7 @@ crm-hudco/
 ├── components/ # Shared components (Layout/sidebar)
 ├── context/ # Auth, Socket, and Unread-count state
 └── api/ # Axios instance
-
+```
 
 ---
 
