@@ -64,13 +64,6 @@ export default function Login() {
           {" "}
           Log in{" "}
         </button>{" "}
-        <p className="text-sm text-ink/60 text-center mt-6">
-          {" "}
-          No account?{" "}
-          <Link to="/register" className="text-steel font-medium">
-            Register
-          </Link>{" "}
-        </p>{" "}
       </form>{" "}
     </div>
   );

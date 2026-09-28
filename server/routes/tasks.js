@@ -1,6 +1,7 @@
 import express from "express";
 import prisma from "../prisma/client.js";
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
+import { notifyTaskAssigned } from "../services/notifications.js";
 const router = express.Router();
 
 // CREATE a task (admin only) — assign to multiple employees, with optional subtasks
@@ -28,6 +29,11 @@ router.post("/", requireAuth, requireAdmin, async (req, res) => {
       },
       include: { assignees: true, subtasks: true },
     });
+    notifyTaskAssigned(
+      task,
+      [...assigneeIds, ...(subtasks || []).map((s) => s.assignedTo)],
+      req.user.userId,
+    ).catch(console.error);
     res.status(201).json(task);
   } catch (err) {
     console.error(err);

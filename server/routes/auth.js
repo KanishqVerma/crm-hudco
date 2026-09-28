@@ -2,10 +2,11 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma/client.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 const router = express.Router();
-router.post("/register", async (req, res) => {
+router.post('/register', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     if (!name || !email || !password) {
       return res
         .status(400)
@@ -18,7 +19,7 @@ router.post("/register", async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword, role: "employee" },
+      data: { name, email, password: hashedPassword, role: role || "employee" },
     });
     res.status(201).json({ message: "User created", userId: user.id });
   } catch (err) {

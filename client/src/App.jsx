@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { UnreadProvider } from "./context/UnreadContext";
 import Tasks from "./pages/Tasks";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
 import CalendarPage from "./pages/Calendar";
@@ -21,7 +20,6 @@ function AppRoutes() {
     <Routes>
       {" "}
       <Route path="/login" element={<Login />} />{" "}
-      <Route path="/register" element={<Register />} />{" "}
       <Route
         path="/dashboard"
         element={

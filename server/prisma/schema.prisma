@@ -24,6 +24,7 @@ model User {
   todos Todo[]
   conversations ConversationParticipant[] 
   messagesSent Message[] 
+  @@map("tbl_crm_user")
 }
 
 model Task { 
@@ -36,6 +37,7 @@ model Task {
   createdAt DateTime @default(now()) 
   assignees TaskAssignee[] 
   subtasks Subtask[] 
+  @@map("tbl_crm_task")
 } 
 
 model TaskAssignee { 
@@ -44,7 +46,8 @@ model TaskAssignee {
   userId Int 
   task Task @relation(fields: [taskId], references: [id]) 
   user User @relation(fields: [userId], references: [id]) 
-  @@unique([taskId, userId]) 
+  @@unique([taskId, userId])
+  @@map("tbl_crm_task_assignee") 
 } 
 
 model Subtask { 
@@ -55,7 +58,8 @@ model Subtask {
   assignedTo Int? 
   createdAt DateTime @default(now()) 
   task Task @relation(fields: [taskId], references: [id]) 
-  assignee User? @relation(fields: [assignedTo], references: [id]) 
+  assignee User? @relation(fields: [assignedTo], references: [id])
+  @@map("tbl_crm_subtask") 
 }
 
 model Todo { 
@@ -65,24 +69,31 @@ model Todo {
   status String @default("pending") 
   dueDate DateTime? 
   createdAt DateTime @default(now()) 
-  user User @relation(fields: [userId], references: [id]) 
+  user User @relation(fields: [userId], references: [id])
+  @@map("tbl_crm_todo") 
 }
 
 model Conversation { 
   id Int @id @default(autoincrement()) 
+  name String? 
+  isGroup Boolean @default(false) 
+  createdBy Int? 
   createdAt DateTime @default(now()) 
   participants ConversationParticipant[] 
   messages Message[] 
+  @@map("tbl_crm_conversation") 
 } 
 
 model ConversationParticipant { 
   id Int @id @default(autoincrement()) 
   conversationId Int 
   userId Int 
-  lastReadAt DateTime?
-  conversation Conversation @relation(fields: [conversationId], references: [id]) 
+  lastReadAt DateTime? 
+  lastNotifiedAt DateTime? 
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade) 
   user User @relation(fields: [userId], references: [id]) 
   @@unique([conversationId, userId]) 
+  @@map("tbl_crm_conversation_participant") 
 } 
 
 model Message { 
@@ -91,7 +102,20 @@ model Message {
   senderId Int 
   content String @db.Text 
   createdAt DateTime @default(now()) 
-  conversation Conversation @relation(fields: [conversationId], references: [id]) 
-  sender User @relation(fields: [senderId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade) 
+  sender User @relation(fields: [senderId], references: [id]) 
+  attachment Attachment? 
+  @@index([createdAt]) 
+  @@map("tbl_crm_message") 
 }
 
+model Attachment { 
+  id Int @id @default(autoincrement()) 
+  messageId Int @unique 
+  fileName String 
+  mimeType String 
+  size Int 
+  data Bytes 
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade) 
+  @@map("tbl_crm_attachment") 
+} 
