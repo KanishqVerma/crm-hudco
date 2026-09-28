@@ -234,14 +234,14 @@ All routes except login require an `Authorization: Bearer <token>` header.
 
 ---
 
-## Known limitations
+<!-- ## Known limitations
 
 - No way to change your own password. Admins set the initial password when creating an account.
 - Tasks cannot be edited after creation, only deleted.
 - Group members cannot be added, removed, or leave after a group is created.
 - A new group appears for other members after its first message (or a refresh).
 - No email reminders for approaching deadlines.
-- Files are limited to 1 MB.
+- Files are limited to 1 MB. -->
 
 ## License
 
