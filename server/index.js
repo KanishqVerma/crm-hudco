@@ -4,6 +4,8 @@ import { startRetentionJob } from "./services/retention.js";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { inspect } from 'node:util';
+import prisma from './prisma/client.js';
 import jwt from "jsonwebtoken";
 import authRoutes from "./routes/auth.js";
 import taskRoutes from "./routes/tasks.js";
@@ -65,3 +67,13 @@ httpServer.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 startRetentionJob();
+
+
+prisma.$queryRaw`SELECT 1`
+  .then(() => console.log('Database connection OK'))
+  .catch((err) =>
+    console.error(
+      'Database connection FAILED:',
+      inspect(err?.meta?.driverAdapterError ?? err, { depth: 8 })
+    )
+  );
