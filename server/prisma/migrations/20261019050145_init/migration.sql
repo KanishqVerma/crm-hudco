@@ -1,67 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `conversation` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `conversationparticipant` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `message` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `subtask` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `task` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `taskassignee` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `todo` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `user` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE `conversationparticipant` DROP FOREIGN KEY `ConversationParticipant_conversationId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `conversationparticipant` DROP FOREIGN KEY `ConversationParticipant_userId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `message` DROP FOREIGN KEY `Message_conversationId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `message` DROP FOREIGN KEY `Message_senderId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `subtask` DROP FOREIGN KEY `Subtask_assignedTo_fkey`;
-
--- DropForeignKey
-ALTER TABLE `subtask` DROP FOREIGN KEY `Subtask_taskId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `taskassignee` DROP FOREIGN KEY `TaskAssignee_taskId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `taskassignee` DROP FOREIGN KEY `TaskAssignee_userId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `todo` DROP FOREIGN KEY `Todo_userId_fkey`;
-
--- DropTable
-DROP TABLE `conversation`;
-
--- DropTable
-DROP TABLE `conversationparticipant`;
-
--- DropTable
-DROP TABLE `message`;
-
--- DropTable
-DROP TABLE `subtask`;
-
--- DropTable
-DROP TABLE `task`;
-
--- DropTable
-DROP TABLE `taskassignee`;
-
--- DropTable
-DROP TABLE `todo`;
-
--- DropTable
-DROP TABLE `user`;
-
 -- CreateTable
 CREATE TABLE `tbl_crm_user` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
@@ -125,19 +61,23 @@ CREATE TABLE `tbl_crm_todo` (
 -- CreateTable
 CREATE TABLE `tbl_crm_conversation` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NULL,
+    `isGroup` BOOLEAN NOT NULL DEFAULT false,
+    `createdBy` INTEGER NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `tbl_crm_conversationParticipant` (
+CREATE TABLE `tbl_crm_conversation_participant` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `conversationId` INTEGER NOT NULL,
     `userId` INTEGER NOT NULL,
     `lastReadAt` DATETIME(3) NULL,
+    `lastNotifiedAt` DATETIME(3) NULL,
 
-    UNIQUE INDEX `tbl_crm_conversationParticipant_conversationId_userId_key`(`conversationId`, `userId`),
+    UNIQUE INDEX `tbl_crm_conversation_participant_conversationId_userId_key`(`conversationId`, `userId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -149,6 +89,20 @@ CREATE TABLE `tbl_crm_message` (
     `content` TEXT NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    INDEX `tbl_crm_message_createdAt_idx`(`createdAt`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `tbl_crm_attachment` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `messageId` INTEGER NOT NULL,
+    `fileName` VARCHAR(191) NOT NULL,
+    `mimeType` VARCHAR(191) NOT NULL,
+    `size` INTEGER NOT NULL,
+    `data` LONGBLOB NOT NULL,
+
+    UNIQUE INDEX `tbl_crm_attachment_messageId_key`(`messageId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -168,13 +122,16 @@ ALTER TABLE `tbl_crm_subtask` ADD CONSTRAINT `tbl_crm_subtask_assignedTo_fkey` F
 ALTER TABLE `tbl_crm_todo` ADD CONSTRAINT `tbl_crm_todo_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `tbl_crm_user`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `tbl_crm_conversationParticipant` ADD CONSTRAINT `tbl_crm_conversationParticipant_conversationId_fkey` FOREIGN KEY (`conversationId`) REFERENCES `tbl_crm_conversation`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `tbl_crm_conversation_participant` ADD CONSTRAINT `tbl_crm_conversation_participant_conversationId_fkey` FOREIGN KEY (`conversationId`) REFERENCES `tbl_crm_conversation`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `tbl_crm_conversationParticipant` ADD CONSTRAINT `tbl_crm_conversationParticipant_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `tbl_crm_user`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `tbl_crm_conversation_participant` ADD CONSTRAINT `tbl_crm_conversation_participant_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `tbl_crm_user`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `tbl_crm_message` ADD CONSTRAINT `tbl_crm_message_conversationId_fkey` FOREIGN KEY (`conversationId`) REFERENCES `tbl_crm_conversation`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `tbl_crm_message` ADD CONSTRAINT `tbl_crm_message_conversationId_fkey` FOREIGN KEY (`conversationId`) REFERENCES `tbl_crm_conversation`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `tbl_crm_message` ADD CONSTRAINT `tbl_crm_message_senderId_fkey` FOREIGN KEY (`senderId`) REFERENCES `tbl_crm_user`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `tbl_crm_attachment` ADD CONSTRAINT `tbl_crm_attachment_messageId_fkey` FOREIGN KEY (`messageId`) REFERENCES `tbl_crm_message`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
